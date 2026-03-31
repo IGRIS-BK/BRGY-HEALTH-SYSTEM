@@ -1,29 +1,21 @@
 import { useState } from "react";
-import type { ReactNode } from "react";
 import { Bell, PanelLeft } from "lucide-react";
+import { Outlet } from "react-router-dom";
 
 import AppSidebar from "../components/common/AppSidebar";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="flex h-screen w-full bg-slate-200">
 
-      {/* SIDEBAR */}
       <AppSidebar collapsed={collapsed} />
 
-      {/* MAIN */}
       <div className="flex flex-1 flex-col bg-[#f7f7fb]">
 
         {/* HEADER */}
         <header className="flex items-center justify-between border-b bg-white px-6 py-4 shadow-sm">
-
-          {/* LEFT */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCollapsed(!collapsed)}
@@ -42,7 +34,6 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          {/* RIGHT */}
           <div className="flex items-center gap-3">
             <input
               type="text"
@@ -61,7 +52,9 @@ export default function DashboardLayout({
 
         {/* CONTENT */}
         <main className="flex-1 overflow-auto p-6">
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto">
+            <Outlet /> {/* ✅ THIS FIXES THE ERROR */}
+          </div>
         </main>
 
       </div>
