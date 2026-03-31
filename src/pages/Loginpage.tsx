@@ -1,20 +1,32 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Mail, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+  const navigate = useNavigate(); // ✅ ADD THIS
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    setLoading(true);
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    setLoading(false);
+
     if (error) {
       alert(error.message);
+      return;
     }
+
+    // ✅ REDIRECT TO DASHBOARD
+    navigate("/");
   };
 
   return (
@@ -28,6 +40,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold mb-2">Hello!</h1>
           <p className="text-gray-500 mb-6">Sign in to your account</p>
 
+          {/* EMAIL */}
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-3 mb-4">
             <Mail className="text-purple-600 mr-3" size={18} />
             <input
@@ -39,6 +52,7 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* PASSWORD */}
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-3 mb-4">
             <Lock className="text-purple-600 mr-3" size={18} />
             <input
@@ -50,12 +64,15 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* BUTTON */}
           <button
             onClick={handleLogin}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-full"
+            disabled={loading}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-full hover:opacity-90 transition"
           >
-            SIGN IN
+            {loading ? "Signing in..." : "SIGN IN"}
           </button>
+
         </div>
 
         {/* RIGHT */}
