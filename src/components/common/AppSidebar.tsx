@@ -3,9 +3,10 @@ import { LayoutDashboard, Users, HeartPulse, LogOut } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Residents", url: "/residents", icon: Users },
-  { title: "Health Records", url: "/health", icon: HeartPulse },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Residents", url: "/dashboard/residents", icon: Users },
+  { title: "Health Records", url: "/dashboard/health-records", icon: HeartPulse },
+  { title: "Pregnancies", url: "/dashboard/pregnancies", icon: Baby }, // ✅ NEW
 ];
 
 export default function AppSidebar({ collapsed }: { collapsed: boolean }) {

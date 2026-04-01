@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import LoginPage from "./pages/Loginpage";
 import AppRoutes from "./routes/AppRoutes";
+import { Toaster } from "sonner"; // ✅ use direct import
 
 export default function App() {
   const [session, setSession] = useState<any>(null);
@@ -29,5 +30,10 @@ export default function App() {
 
   if (loading) return <div>Loading...</div>;
 
-  return session ? <AppRoutes /> : <LoginPage />;
+  return (
+    <>
+      {session ? <AppRoutes /> : <LoginPage />}
+      <Toaster richColors position="top-right" /> {/* ✅ FIXED */}
+    </>
+  );
 }
