@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, HeartPulse, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, HeartPulse, LogOut, Baby } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 const items = [

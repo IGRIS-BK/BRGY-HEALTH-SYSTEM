@@ -1,0 +1,68 @@
+type Props = {
+  data: any[];
+  loading: boolean;
+};
+
+export default function PregnancyTable({ data, loading }: Props) {
+  return (
+    <div className="bg-white rounded-2xl shadow border overflow-hidden">
+      {loading ? (
+        <p className="p-6 text-gray-500">Loading...</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="text-left px-4 py-3">Resident</th>
+              <th className="text-center px-4 py-3">Due Date</th>
+              <th className="text-center px-4 py-3">Last Checkup</th>
+              <th className="text-center px-4 py-3">Risk Level</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center py-6 text-gray-400">
+                  No records found
+                </td>
+              </tr>
+            ) : (
+              data.map((p) => (
+                <tr key={p.id} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    {p.residents
+                      ? `${p.residents.first_name} ${p.residents.last_name}`
+                      : "—"}
+                  </td>
+
+                  <td className="text-center px-4 py-3">
+                    {p.expected_due_date || "-"}
+                  </td>
+
+                  <td className="text-center px-4 py-3">
+                    {p.last_checkup || "-"}
+                  </td>
+
+                  <td className="text-center px-4 py-3">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold
+                        ${
+                          p.risk_level === "High"
+                            ? "bg-red-100 text-red-600"
+                            : p.risk_level === "Medium"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
+                    >
+                      {p.risk_level || "-"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}

@@ -1,51 +1,97 @@
 import { supabase } from "./supabase";
 
-export async function addResident(form: any) {
-  // STEP 1: insert resident
+// ==============================
+// TYPES
+// ==============================
+
+export type PregnancyForm = {
+  resident_id: string;
+  expected_due_date?: string;
+  last_checkup?: string;
+  risk_level?: string;
+};
+
+export type ResidentForm = {
+  first_name: string;
+  middle_initial?: string;
+  last_name: string;
+  birthdate?: string;
+  sex?: string;
+  contact_number?: string;
+  zone?: string;
+  barangay?: string;
+  municipal?: string;
+  province?: string;
+};
+
+// ==============================
+// RESIDENT QUERIES
+// ==============================
+
+export async function addResident(form: ResidentForm) {
   const { data: residentData, error: residentError } = await supabase
     .from("residents")
     .insert([
       {
         first_name: form.first_name,
-        middle_initial: form.middle_initial,
+        middle_initial: form.middle_initial || null,
         last_name: form.last_name,
-        birthdate: form.birthdate,
-        sex: form.sex,
-        contact_number: form.contact_number,
+        birthdate: form.birthdate || null,
+        sex: form.sex || null,
+        contact_number: form.contact_number || null,
       },
     ])
     .select()
     .single();
 
-  if (residentError) throw residentError;
+  if (residentError) {
+    console.error("Error inserting resident:", residentError);
+    throw residentError;
+  }
 
   const residentId = residentData.id;
 
-  // STEP 2: insert address (optional)
   if (form.barangay || form.zone) {
     const { error: addressError } = await supabase
       .from("resident_addresses")
       .insert([
         {
           resident_id: residentId,
-          zone: form.zone,
-          barangay: form.barangay,
-          municipal: form.municipal,
-          province: form.province,
+          zone: form.zone || null,
+          barangay: form.barangay || null,
+          municipal: form.municipal || null,
+          province: form.province || null,
         },
       ]);
 
-    if (addressError) throw addressError;
+    if (addressError) {
+      console.error("Error inserting address:", addressError);
+      throw addressError;
+    }
   }
 
   return residentData;
+}
+
+// 🔥 GET RESIDENTS (for dropdown)
+export async function getResidents() {
+  const { data, error } = await supabase
+    .from("residents")
+    .select("id, first_name, last_name")
+    .order("first_name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching residents:", error);
+    throw error;
+  }
+
+  return data ?? [];
 }
 
 // ==============================
 // HEALTH RECORDS QUERIES
 // ==============================
 
-// 🔥 GET ALL HEALTH RECORDS (with resident name)
 export async function getHealthRecords() {
   const { data, error } = await supabase
     .from("health_records")
@@ -61,10 +107,9 @@ export async function getHealthRecords() {
 
   if (error) throw error;
 
-  return data;
+  return data ?? [];
 }
 
-// 🔥 GET HEALTH RECORDS BY RESIDENT
 export async function getHealthRecordsByResident(residentId: string) {
   const { data, error } = await supabase
     .from("health_records")
@@ -80,20 +125,19 @@ export async function getHealthRecordsByResident(residentId: string) {
 
   if (error) throw error;
 
-  return data;
+  return data ?? [];
 }
 
-// 🔥 ADD HEALTH RECORD
 export async function addHealthRecord(form: any) {
   const { data, error } = await supabase
     .from("health_records")
     .insert([
       {
         resident_id: form.resident_id,
-        visit_date: form.visit_date,
-        service_type: form.service_type,
-        remarks: form.remarks,
-        staff_name: form.staff_name,
+        visit_date: form.visit_date || null,
+        service_type: form.service_type || null,
+        remarks: form.remarks || null,
+        staff_name: form.staff_name || null,
       },
     ])
     .select()
@@ -104,23 +148,21 @@ export async function addHealthRecord(form: any) {
   return data;
 }
 
-// 🔥 UPDATE HEALTH RECORD
 export async function updateHealthRecord(id: string, form: any) {
   const { error } = await supabase
     .from("health_records")
     .update({
       resident_id: form.resident_id,
-      visit_date: form.visit_date,
-      service_type: form.service_type,
-      remarks: form.remarks,
-      staff_name: form.staff_name,
+      visit_date: form.visit_date || null,
+      service_type: form.service_type || null,
+      remarks: form.remarks || null,
+      staff_name: form.staff_name || null,
     })
     .eq("id", id);
 
   if (error) throw error;
 }
 
-// 🔥 DELETE HEALTH RECORD
 export async function deleteHealthRecord(id: string) {
   const { error } = await supabase
     .from("health_records")
@@ -134,12 +176,16 @@ export async function deleteHealthRecord(id: string) {
 // PREGNANCY QUERIES
 // ==============================
 
-// 🔥 GET ALL PREGNANCIES
 export async function getPregnancies() {
   const { data, error } = await supabase
     .from("pregnancies")
     .select(`
-      *,
+      id,
+      resident_id,
+      expected_due_date,
+      last_checkup,
+      risk_level,
+      created_at,
       resident:residents (
         id,
         first_name,
@@ -148,52 +194,73 @@ export async function getPregnancies() {
     `)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching pregnancies:", error);
+    throw error;
+  }
 
-  return data;
+  return data ?? [];
 }
 
-// 🔥 ADD PREGNANCY
-export async function addPregnancy(form: any) {
+export async function addPregnancy(form: PregnancyForm) {
   const { data, error } = await supabase
     .from("pregnancies")
     .insert([
       {
         resident_id: form.resident_id,
-        expected_due_date: form.expected_due_date,
-        last_checkup: form.last_checkup,
-        risk_level: form.risk_level,
+        expected_due_date: form.expected_due_date || null,
+        last_checkup: form.last_checkup || null,
+        risk_level: form.risk_level || null,
       },
     ])
-    .select()
+    .select(`
+      id,
+      resident_id,
+      expected_due_date,
+      last_checkup,
+      risk_level,
+      created_at,
+      resident:residents (
+        id,
+        first_name,
+        last_name
+      )
+    `)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error adding pregnancy:", error);
+    throw error;
+  }
 
   return data;
 }
 
-// 🔥 UPDATE PREGNANCY
-export async function updatePregnancy(id: string, form: any) {
+export async function updatePregnancy(id: string, form: PregnancyForm) {
   const { error } = await supabase
     .from("pregnancies")
     .update({
       resident_id: form.resident_id,
-      expected_due_date: form.expected_due_date,
-      last_checkup: form.last_checkup,
-      risk_level: form.risk_level,
+      expected_due_date: form.expected_due_date || null,
+      last_checkup: form.last_checkup || null,
+      risk_level: form.risk_level || null,
     })
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error updating pregnancy:", error);
+    throw error;
+  }
 }
 
-// 🔥 DELETE PREGNANCY
 export async function deletePregnancy(id: string) {
   const { error } = await supabase
     .from("pregnancies")
     .delete()
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error deleting pregnancy:", error);
+    throw error;
+  }
 }
