@@ -14,6 +14,7 @@ type Props = {
   onSuccess: () => void;
   addPregnancy: (data: PregnancyForm) => Promise<any>;
   residents: Resident[];
+  selected?: any;
 };
 
 export default function AddPregnancyModal({

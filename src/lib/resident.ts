@@ -186,9 +186,10 @@ export async function getPregnancies() {
       last_checkup,
       risk_level,
       created_at,
-      resident:residents (
+      resident:residents!pregnancies_resident_id_fkey (
         id,
         first_name,
+        middle_initial,
         last_name
       )
     `)
@@ -210,7 +211,7 @@ export async function addPregnancy(form: PregnancyForm) {
         resident_id: form.resident_id,
         expected_due_date: form.expected_due_date || null,
         last_checkup: form.last_checkup || null,
-        risk_level: form.risk_level || null,
+        risk_level: form.risk_level || "Low",
       },
     ])
     .select(`
@@ -220,9 +221,10 @@ export async function addPregnancy(form: PregnancyForm) {
       last_checkup,
       risk_level,
       created_at,
-      resident:residents (
+      resident:residents!pregnancies_resident_id_fkey (
         id,
         first_name,
+        middle_initial,
         last_name
       )
     `)

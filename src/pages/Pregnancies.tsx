@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import {
   getPregnancies,
   addPregnancy,
-  getResidents, // ✅ IMPORT THIS
+  getResidents,
+  deletePregnancy, // ✅ ADD THIS
 } from "../lib/resident";
 
 import PregnancyTable from "../components/pregnancies/PregnancyTable";
@@ -23,6 +24,9 @@ export default function Pregnancies() {
   const [open, setOpen] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
 
+  // 🔥 (NEW) for edit
+  const [selected, setSelected] = useState<any>(null);
+
   // 🔥 Fetch pregnancies
   const fetchData = async () => {
     setLoading(true);
@@ -35,7 +39,7 @@ export default function Pregnancies() {
     setLoading(false);
   };
 
-  // 🔥 Fetch residents (for dropdown)
+  // 🔥 Fetch residents
   const fetchResidents = async () => {
     try {
       const res = await getResidents();
@@ -45,10 +49,9 @@ export default function Pregnancies() {
     }
   };
 
-  // 🔥 Load everything
   useEffect(() => {
     fetchData();
-    fetchResidents(); // ✅ IMPORTANT
+    fetchResidents();
   }, []);
 
   return (
@@ -60,7 +63,10 @@ export default function Pregnancies() {
         </h1>
 
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setSelected(null); // ✅ reset when adding
+            setOpen(true);
+          }}
           className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm"
         >
           + Add Pregnancy
@@ -71,7 +77,23 @@ export default function Pregnancies() {
       <PregnancySummaryCards data={data} />
 
       {/* TABLE */}
-      <PregnancyTable data={data} loading={loading} />
+      <PregnancyTable
+        data={data}
+        loading={loading}
+        onEdit={(item) => {
+          setSelected(item);   // ✅ store selected
+          setOpen(true);       // open modal
+        }}
+        onDelete={async (id) => {
+          try {
+            await deletePregnancy(id);
+            toast.success("Deleted successfully");
+            fetchData();
+          } catch (err: any) {
+            toast.error(err.message);
+          }
+        }}
+      />
 
       {/* MODAL */}
       <AddPregnancyModal
@@ -79,7 +101,8 @@ export default function Pregnancies() {
         setOpen={setOpen}
         onSuccess={fetchData}
         addPregnancy={addPregnancy}
-        residents={residents} // ✅ FIXED
+        residents={residents}
+        selected={selected} // ✅ pass for editing (important)
       />
     </div>
   );
